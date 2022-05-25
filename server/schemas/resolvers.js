@@ -43,6 +43,24 @@ const resolvers = {
       return { token, user };
     },
     // save book
+    saveBook: async (parent, args, context) => {
+      if (context.user) {
+        const book = await Book.create({
+          ...args,
+          username: context.user.username,
+        });
+
+        await User.findByIdAndUpdate(
+          { _id: context._id },
+          { $addToSet: { savedBooks: book._id } },
+          { new: true }
+        );
+
+        return book;
+      }
+
+      throw new AuthenticationError("You need to be logged in!");
+    },
   },
 };
 
